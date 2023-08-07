@@ -31,7 +31,7 @@ classdef Math
             end
 
             input_arrs = varargin;
-            input_arrs_num = nargin;
+            input_arrs_num = length(varargin);
             input_arrs_lengths = zeros(1, input_arrs_num);
 
             for i = 1:input_arrs_num
@@ -64,6 +64,16 @@ classdef Math
 
             end
 
+        end
+
+        function res = randsample(~, arr, num)
+
+            if ~isvector(arr)
+                error('输入参数必须为向量');
+            end
+
+            rand_arr = Shuffle(arr);
+            res = rand_arr(1:num);
         end
 
     end

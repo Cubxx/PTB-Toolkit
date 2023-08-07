@@ -10,17 +10,17 @@ classdef File < handle
 
         function obj = File(path, mode, varargin)
 
-            if nargin < 1
+            if ~exist('path', 'var') || isempty(path)
                 path = 'untitled.csv';
             end
 
-            if nargin < 2
+            if ~exist('mode', 'var') || isempty(mode)
                 mode = 'w';
             end
 
-            obj.isWriteKeys = true;
-            obj.path = path;
             obj.id = fopen(path, mode, varargin{:});
+            obj.path = path;
+            obj.isWriteKeys = true;
 
             if obj.id == -1
                 error('文件打开失败')
@@ -34,21 +34,20 @@ classdef File < handle
 
         function write(obj, varargin)
             fid = obj.id;
-            n = length(varargin);
-            ks = cell(1, n); % key
-            ss = cell(1, n); % spec
-            vs = cell(1, n); % value
+            fprintf(fid, varargin{:});
+        end
 
-            for i = 1:n
-                [ks{i}, ss{i}, vs{i}] = varargin{:, i}{:};
-            end
+        function wirteMap(obj, Map)
+            fid = obj.id;
+            values = cellfun(@num2str, Map.values, 'UniformOutput', false);
 
             if obj.isWriteKeys
                 obj.isWriteKeys = false;
-                fprintf(fid, '%s\n', strjoin(ks, ','));
+                fprintf(fid, '%s\n', strjoin(Map.keys, ','));
             end
 
-            fprintf(fid, [strjoin(ss, ','), '\n'], vs{:});
+            spec = repmat(',%s', 1, Map.Count);
+            fprintf(fid, [spec(2:end), '\n'], values{:});
         end
 
     end

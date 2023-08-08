@@ -72,6 +72,10 @@ classdef Math
                 error('输入参数必须为向量');
             end
 
+            if num > length(arr)
+                error('采样量过大');
+            end
+
             rand_arr = Shuffle(arr);
             res = rand_arr(1:num);
         end

@@ -93,28 +93,28 @@ classdef Element
             win = obj.app.win;
             orig_pic_arr = imread(filepath);
             [pic_arr, pic_hw_pix] = resize(orig_pic_arr, degree); % 控制大小
-            pic_rect = centerRect(pic_hw_pix([2, 1]), offset); % 控制位置
+            pic_rect = centerRect(offset); % 控制位置
             texture = Screen('MakeTexture', win, pic_arr);
             Screen('DrawTexture', win, texture, [], pic_rect, angle, varargin{:});
 
-            function pic_rect = centerRect(pic_wh_pix, offset)
+            function pic_rect = centerRect(offset)
                 [center_x, center_y] = RectCenter(obj.app.winRect); % win中心点
                 anchor_point = num2cell([center_x, center_y] + offset); % 图片锚点位置
-                pic_rect = CenterRectOnPoint([0, 0, pic_wh_pix], anchor_point{:});
+                pic_rect = CenterRectOnPoint([0, 0, pic_hw_pix([2, 1])], anchor_point{:});
             end
 
-            function [arr, pic_hw_pix] = resize(orig_arr, degree)
-                orig_pic_hw_pix = size(orig_arr); % 图片原始尺寸
-                wh_ratio = orig_pic_hw_pix(2) / orig_pic_hw_pix(1); % 图片宽高比
-                pic_hw_pix = deg2pix(degree * [1 / wh_ratio, 1]);
-                arr = imresize(orig_arr, pic_hw_pix); % 改变orig_arr大小
+            function [pic_arr, pic_hw_pix] = resize(orig_pic_arr, degree)
+                orig_pic_hw_pix = size(orig_pic_arr); % 图片原始尺寸
+                hw_ratio = orig_pic_hw_pix(1) / orig_pic_hw_pix(2); % 图片高宽比
+                pic_hw_pix = deg2pix(degree .* [hw_ratio, 1]);
+                pic_arr = imresize(orig_pic_arr, pic_hw_pix); % 改变orig_pic_arr大小
             end
 
-            function arr = deg2pix(wh_deg)
-                wh_cm = 2 * obj.app.distance * tand(wh_deg ./ 2);
-                screen_wh_cm = obj.app.screenSize;
-                screen_wh_pix = get(0, 'ScreenSize') .* obj.app.screenZoom;
-                arr = round(wh_cm .* screen_wh_pix(3:4) ./ screen_wh_cm);
+            function pic_pix = deg2pix(pic_deg)
+                pic_cm = 2 * obj.app.distance * tand(pic_deg ./ 2);
+                screen_cm = obj.app.screenSize;
+                screen_pix = get(0, 'ScreenSize') .* obj.app.screenZoom;
+                pic_pix = round(pic_cm ./ screen_cm .* screen_pix(3:4));
             end
 
         end
@@ -129,6 +129,29 @@ classdef Element
             obj.render(duration);
         end
 
+        function realDuration = beep(obj, duration, volume, freq)
+
+            if ~exist('duration', "var") || isempty(duration)
+                duration = 1;
+            end
+
+            if ~exist('volume', "var") || isempty(volume)
+                volume = 0.5;
+            end
+
+            if ~exist('freq', "var") || isempty(freq)
+                freq = 440;
+            end
+
+            handle = obj.app.portAudio;
+            PsychPortAudio('Volume', handle, volume);
+            beepArr = MakeBeep(freq, duration, obj.app.sampleRate);
+            PsychPortAudio('FillBuffer', handle, repmat(beepArr, obj.app.channels, 1));
+            PsychPortAudio('Start', handle, 1, 0, 1); % 重复次数
+            [realStartTime, ~, ~, realStopTime] = PsychPortAudio('Stop', handle, 1); % 1等音频放完，2强制停止
+            realDuration = realStopTime - realStartTime;
+        end
+
         % display
         function render(obj, varargin)
             Screen('Flip', obj.app.win);
@@ -137,7 +160,7 @@ classdef Element
 
         function listen(obj, duration, type, callback)
 
-            if ~exist('type', "var")
+            if ~exist('type', "var") || isempty(type)
                 type = 'keydown';
 
                 if duration == inf

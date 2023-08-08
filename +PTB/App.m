@@ -12,6 +12,9 @@ classdef App < handle
         screenZoom = 1; % 系统屏幕缩放
         screenSize = [34.4, 19.5]; % 屏幕尺寸, 单位cm
         distance = 57; % 眼睛到屏幕的距离, 单位cm
+        portAudio; % 端口音频
+        sampleRate = 44100; % 音频采样率
+        channels = 2; % 声道数
     end
 
     properties (SetAccess = immutable) % 只能由constructor设置
@@ -33,7 +36,7 @@ classdef App < handle
 
         % base
         function debug(obj)
-            % dbstop if error;
+            dbstop if error;
             ShowCursor;
             obj.winSize = [0, 0, 640, 360];
             % 检查按键
@@ -47,18 +50,41 @@ classdef App < handle
         end
 
         function begin(obj)
-            ScreenNum = max(Screen('Screens'));
-            [obj.win, obj.winRect] = Screen('OpenWindow', ScreenNum, obj.backgroundColor, obj.winSize);
-
+            %% 视觉刺激
+            [obj.win, obj.winRect] = Screen('OpenWindow', 0, obj.backgroundColor, obj.winSize);
             Screen('TextSize', obj.win, obj.textSize);
             Screen('TextStyle', obj.win, obj.textStyle);
             Screen('TextFont', obj.win, obj.textFont);
+            %% 听觉刺激
+            InitializePsychSound();
+            % PsychPortAudio('GetDevices'); % 获取所有音频设备信息
+            % PsychPortAudio('GetStatus', obj.portAudio); % 获取当前音频设备信息
+            % 自动选择合适的采样率
+            sampleRates = [48000, 44100];
+
+            for sr = sampleRates
+
+                try
+                    obj.portAudio = PsychPortAudio('Open', [], 1, 1, obj.sampleRate, obj.channels); % 打开音频设备：设备id；模式：播放/录制；音频滞后
+                    obj.sampleRate = sr;
+                    break;
+                catch err
+
+                    if sr == sampleRates(end)
+                        error(err);
+                    end
+
+                end
+
+            end
+
         end
 
         function finish(obj)
             ShowCursor;
             Screen('Close', obj.win);
             % Screen('CloseAll');
+            PsychPortAudio('Close', obj.portAudio);
         end
 
         function exit(obj)

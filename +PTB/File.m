@@ -37,17 +37,48 @@ classdef File < handle
             fprintf(fid, varargin{:});
         end
 
-        function wirteMap(obj, Map)
+        function writeKeyValuePair(obj, keys, values)
+
+            if ~iscell(keys) || ~iscell(values)
+                error('请输入cell数组')
+            end
+
+            if width(keys) ~= width(values)
+                error('keys和values的长度应相等');
+            end
+
             fid = obj.id;
-            values = cellfun(@num2str, Map.values, 'UniformOutput', false);
 
             if obj.isWriteKeys
                 obj.isWriteKeys = false;
-                fprintf(fid, '%s\n', strjoin(Map.keys, ','));
+                fprintf(fid, '%s\n', strjoin(keys, ','));
             end
 
-            spec = repmat(',%s', 1, Map.Count);
+            spec = repmat(',%s', 1, width(keys));
+            values = cellfun(@num2str, values, 'UniformOutput', false);
             fprintf(fid, [spec(2:end), '\n'], values{:});
+        end
+
+        function writeMap(obj, Map)
+
+            if ~isa(Map, 'containers.Map')
+                error('请输入Map数据');
+            end
+
+            obj.writeKeyValuePair(Map.keys, Map.values);
+        end
+
+        function writeTable(obj, Table)
+
+            if ~istable(Table)
+                error('请输入table数据');
+            end
+
+            if height(Table) ~= 1
+                error('只支持写入单行table数据');
+            end
+
+            obj.writeKeyValuePair(Table.Properties.VariableNames, table2cell(Table(1, :)));
         end
 
     end

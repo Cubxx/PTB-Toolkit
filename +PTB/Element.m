@@ -147,7 +147,7 @@ classdef Element
             PsychPortAudio('Volume', handle, volume);
             beepArr = MakeBeep(freq, duration, obj.app.sampleRate);
             PsychPortAudio('FillBuffer', handle, repmat(beepArr, obj.app.channels, 1));
-            PsychPortAudio('Start', handle, 1, 0, 1); % 重复次数
+            PsychPortAudio('Start', handle, 1, 1, 1); % 重复次数
             [realStartTime, ~, ~, realStopTime] = PsychPortAudio('Stop', handle, 1); % 1等音频放完，2强制停止
             realDuration = realStopTime - realStartTime;
         end
@@ -162,9 +162,12 @@ classdef Element
 
             if ~exist('type', "var") || isempty(type)
                 type = 'keydown';
+            end
+
+            if ~exist('callback', "var") || isempty(callback)
 
                 if duration == inf
-                    callback = @(varargin)true; % 单次监听
+                    callback = @(~, keyName)strcmp(keyName, obj.app.continueKey); % 单次监听
                 else
                     callback = @(varargin)false; % 持续监听
                 end
@@ -189,8 +192,14 @@ classdef Element
                 switch type
                     case 'keydown'
                         [keyIsDown, ~, keyCode] = KbCheck;
+                        keyName = KbName(keyCode);
 
-                        if keyIsDown && callback(GetSecs - startTime, KbName(keyCode))
+                        if iscell(keyName) % alt键返回cell数组
+                            % keyName(cellfun(@isempty, keyName)) = []; % cell数组去[]
+                            keyName = keyName{:}; % 只保留第一个元素
+                        end
+
+                        if keyIsDown && callback(GetSecs - startTime, keyName)
                             break;
                         end
 

@@ -37,7 +37,7 @@ classdef File < handle
             fprintf(fid, varargin{:});
         end
 
-        function writeKeyValuePair(obj, keys, values)
+        function writeKeyValuePairs(obj, keys, values)
 
             if ~iscell(keys) || ~iscell(values)
                 error('请输入cell数组')
@@ -65,7 +65,7 @@ classdef File < handle
                 error('请输入Map数据');
             end
 
-            obj.writeKeyValuePair(Map.keys, Map.values);
+            obj.writeKeyValuePairs(Map.keys, Map.values);
         end
 
         function writeTable(obj, Table)
@@ -78,7 +78,7 @@ classdef File < handle
                 error('只支持写入单行table数据');
             end
 
-            obj.writeKeyValuePair(Table.Properties.VariableNames, table2cell(Table(1, :)));
+            obj.writeKeyValuePairs(Table.Properties.VariableNames, table2cell(Table(1, :)));
         end
 
     end

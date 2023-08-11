@@ -26,7 +26,6 @@ classdef App < handle
     properties (SetAccess = immutable) % 只能由constructor设置
         Element
         Graphic
-        Math
     end
 
     methods
@@ -37,7 +36,6 @@ classdef App < handle
             Screen('Preference', 'SkipSyncTests', 1);
             obj.Element = PTB.Element(obj);
             obj.Graphic = PTB.Graphic(obj);
-            obj.Math = PTB.Math(obj);
         end
 
         % base

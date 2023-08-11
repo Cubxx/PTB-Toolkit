@@ -1,30 +1,8 @@
 classdef Math
 
-    properties (SetAccess = immutable)
-        app
-    end
+    methods (Static)
 
-    methods
-
-        function obj = Math(app)
-            obj.app = app;
-        end
-
-        function [conditions, n] = combine(~, varargin)
-            map = containers.Map(varargin{:});
-            ks = map.keys;
-            vs = map.values;
-            [arr, n] = PTB.combineArrays(vs{:}); % cell array
-            conditions = cell(n, 1);
-
-            for i = 1:n
-                conditions{i} = containers.Map(ks, arr(i, :)); % valueType: any
-            end
-
-            conditions = Shuffle(conditions);
-        end
-
-        function [output_arr, output_arr_length] = combineArrays(~, varargin)
+        function [output_arr, output_arr_length] = combine(varargin)
 
             if ~all(cellfun(@isvector, varargin))
                 error('输入参数必须为向量');
@@ -66,7 +44,7 @@ classdef Math
 
         end
 
-        function res = randsample(~, arr, num)
+        function res = randsample(arr, num)
 
             if ~isvector(arr)
                 error('输入参数必须为向量');

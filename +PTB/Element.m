@@ -33,7 +33,7 @@ classdef Element
         function multiText(obj, content, line_height, size, offset, varargin)
 
             if ~exist('line_height', "var") || isempty(line_height)
-                line_height = 0;
+                line_height = 30;
             end
 
             if ~exist('size', "var") || isempty(size)
@@ -194,12 +194,18 @@ classdef Element
                         [keyIsDown, ~, keyCode] = KbCheck;
                         keyName = KbName(keyCode);
 
-                        if iscell(keyName) % alt键返回cell数组
+                        if ~keyIsDown
+                            continue;
+                        end
+
+                        if isempty(keyName)
+                            continue;
+                        elseif iscell(keyName) % alt键返回cell数组
                             % keyName(cellfun(@isempty, keyName)) = []; % cell数组去[]
                             keyName = keyName{:}; % 只保留第一个元素
                         end
 
-                        if keyIsDown && callback(GetSecs - startTime, keyName)
+                        if callback(GetSecs - startTime, keyName)
                             break;
                         end
 

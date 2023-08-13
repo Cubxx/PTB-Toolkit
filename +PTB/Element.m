@@ -107,7 +107,7 @@ classdef Element
                 orig_pic_hw_pix = size(orig_pic_arr); % 图片原始尺寸
                 hw_ratio = orig_pic_hw_pix(1) / orig_pic_hw_pix(2); % 图片高宽比
                 pic_hw_pix = deg2pix(degree .* [hw_ratio, 1]);
-                pic_arr = imresize(orig_pic_arr, pic_hw_pix); % 改变orig_pic_arr大小
+                pic_arr = imresize(orig_pic_arr, pic_hw_pix, 'bicubic'); % 改变orig_pic_arr大小
             end
 
             function pic_pix = deg2pix(pic_deg)

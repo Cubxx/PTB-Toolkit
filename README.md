@@ -6,7 +6,7 @@
 # 安装
 请先确保matlab安装了PsychoToolBox
 
-**方法1** 使`+PTB`文件夹和实验程序在同一文件夹下
+**方法1** 把`+PTB`文件夹和实验程序在同一文件夹下
 
 **方法2** 把`+PTB`文件夹路径添加到matlab搜索路径中
 
@@ -16,8 +16,7 @@ app = PTB.App(); % 构建app
 app.debug(); % 启动debug模式
 app.backgroundColor = [255 255 255]; % 背景色设为白色
 app.begin(); % 启动app
-app.Element.multiText('Welcome to test! Please press any key to start.'); % 绘制多行文本
+app.Element.multiText('欢迎参加实验\n请按空格键开始'); % 绘制多行文本
 app.Element.render(inf); % 渲染绘制内容，并启动键盘监听
 app.finish(); % 结束app
 ```
-
